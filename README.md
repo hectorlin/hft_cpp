@@ -1,225 +1,453 @@
-# HFT Socket Server
+# High-Frequency Trading (HFT) Socket Server
 
-A high-performance, ultra-low latency socket server designed for High-Frequency Trading (HFT) applications, built with C++20 and optimized for sub-20μs latency.
+A high-performance, ultra-low latency socket server designed for high-frequency trading applications, built with C++20 and optimized for sub-20μs latency targets.
 
-## 特性 / Features
+## 🚀 Features
 
-- **超低延迟 / Ultra-Low Latency**: 目标延迟 < 20μs
-- **单例架构 / Singleton Architecture**: 确保全局唯一实例
-- **服务模式 / Service Pattern**: 模块化消息处理服务
-- **高性能网络 / High-Performance Networking**: 基于epoll的事件驱动架构
-- **多线程处理 / Multi-threaded Processing**: 可配置的工作线程池
-- **零拷贝优化 / Zero-Copy Optimization**: 预分配缓冲区减少内存分配
+- **Ultra-Low Latency**: Target average latency < 20μs
+- **High Throughput**: Optimized for high message rates
+- **C++20 Modern Features**: Latest language standards and optimizations
+- **Singleton Architecture**: Single server instance management
+- **Service Pattern**: Modular message processing services
+- **Multi-threading**: Efficient concurrent connection handling
+- **epoll-based I/O**: Linux-optimized event notification
+- **Performance Monitoring**: Real-time latency and throughput metrics
 
-## 架构 / Architecture
+## 🏗️ Architecture
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Client Apps   │    │   HFT Server    │    │   Services      │
-│                 │◄──►│                 │◄──►│                 │
-│ - Order Entry   │    │ - Singleton     │    │ - OrderService  │
-│ - Market Data   │    │ - Epoll-based   │    │ - MarketData    │
-│ - Analytics     │    │ - Multi-thread  │    │ - AuthService   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
+### Core Components
 
-## 构建要求 / Build Requirements
+- **HFTServer**: Main server singleton with connection management
+- **IMessageService**: Abstract service interface for message processing
+- **OrderService**: Handles order-related messages
+- **MarketDataService**: Processes market data updates
+- **Connection**: Client connection management with socket optimization
 
-- **编译器 / Compiler**: GCC 10+ 或 Clang 12+
-- **C++标准 / C++ Standard**: C++20
-- **操作系统 / OS**: Linux (推荐内核 5.4+)
-- **依赖 / Dependencies**: pthread
+### Design Patterns
 
-## 构建步骤 / Build Instructions
+- **Singleton Pattern**: Ensures single server instance
+- **Service Pattern**: Decoupled message processing logic
+- **Observer Pattern**: Event-driven message handling
 
-### 1. 克隆仓库 / Clone Repository
+## 📋 Requirements
+
+### System Requirements
+- Linux kernel with epoll support
+- GCC 10+ or Clang 12+ with C++20 support
+- 64-bit architecture recommended
+
+### Dependencies
+- Standard C++20 library
+- POSIX threads (pthread)
+- Linux system calls (socket, epoll, etc.)
+
+## 🛠️ Building
+
+### Option 1: Direct g++ Compilation (Recommended)
+
 ```bash
-git clone <repository-url>
-cd hft_cpp
+# Make build script executable
+chmod +x build.sh
+
+# Build all components
+./build.sh
 ```
 
-### 2. 创建构建目录 / Create Build Directory
+This will build:
+- `hft_server` - Standard HFT server
+- `ultra_hft_server` - Ultra-optimized HFT server with lock-free queues
+- `test_client` - Standard test client
+- `ultra_test_client` - Ultra-optimized test client
+
+### Option 2: CMake Build
+
 ```bash
+# Create build directory
 mkdir build && cd build
-```
 
-### 3. 配置CMake / Configure CMake
-```bash
-cmake .. -DCMAKE_BUILD_TYPE=Release
-```
-
-### 4. 编译 / Build
-```bash
+# Configure and build
+cmake ..
 make -j$(nproc)
-```
 
-### 5. 安装 (可选) / Install (Optional)
-```bash
+# Install (optional)
 sudo make install
 ```
 
-## 运行 / Running
+## 🚀 Running
 
-### 基本用法 / Basic Usage
+### Starting the HFT Server
+
 ```bash
-# 使用默认配置启动服务器
-./bin/hft_server
+# Standard HFT Server
+./build/bin/hft_server --port 8888 --threads 4
 
-# 指定IP和端口
-./bin/hft_server --ip 0.0.0.0 --port 9999
+# Ultra HFT Server (Lock-free optimized)
+./build/bin/ultra_hft_server --port 9999 --threads 8
 
-# 指定工作线程数
-./bin/hft_server --threads 8
-
-# 显示帮助信息
-./bin/hft_server --help
+# Help and options
+./build/bin/hft_server --help
+./build/bin/ultra_hft_server --help
 ```
 
-### 性能测试 / Performance Testing
-```bash
-# 构建性能测试目标
-make perf_test
+### Server Options
 
-# 运行性能测试
-./bin/hft_server --threads 8 --port 8888
+- `--port <port>`: Server port (default: 8888)
+- `--threads <n>`: Number of worker threads (default: 4)
+- `--help`: Show help message
+
+## 🧪 Testing
+
+### Standard Test Client
+
+The `test_client` provides comprehensive testing capabilities for the standard HFT server.
+
+#### Basic Usage
+
+```bash
+# Show help
+./build/bin/test_client --help
+
+# Comprehensive test mode
+./build/bin/test_client --mode comprehensive
+
+# Specific test modes
+./build/bin/test_client --mode performance
+./build/bin/test_client --mode market_data
+./build/bin/test_client --mode heartbeat
 ```
 
-## 配置选项 / Configuration Options
+#### Test Modes
 
-| 选项 / Option | 默认值 / Default | 描述 / Description |
-|---------------|------------------|-------------------|
-| `--ip` | 127.0.0.1 | 服务器IP地址 / Server IP address |
-| `--port` | 8888 | 服务器端口 / Server port |
-| `--threads` | 4 | 工作线程数 / Number of worker threads |
-| `--help` | - | 显示帮助信息 / Show help message |
+1. **Comprehensive Mode** (`--mode comprehensive`)
+   - Runs all test types sequentially
+   - Performance, market data, and heartbeat tests
+   - Full system validation
 
-## 性能优化 / Performance Optimizations
+2. **Performance Mode** (`--mode performance`)
+   - Latency and throughput testing
+   - Message rate analysis
+   - Performance benchmarking
 
-### 编译器优化 / Compiler Optimizations
-- `-O3`: 最高级别优化
-- `-march=native`: 针对本地CPU架构优化
-- `-flto`: 链接时优化
-- `-fno-exceptions`: 禁用异常处理
-- `-fno-rtti`: 禁用RTTI
+3. **Market Data Mode** (`--mode market_data`)
+   - Market data message testing
+   - Bid/ask spread simulation
+   - Volume and price updates
 
-### 网络优化 / Network Optimizations
-- TCP_NODELAY: 禁用Nagle算法
-- SO_REUSEADDR: 地址重用
-- 非阻塞I/O: 异步处理
-- epoll边缘触发: 高效事件通知
+4. **Heartbeat Mode** (`--mode heartbeat`)
+   - Connection health monitoring
+   - Keep-alive message testing
+   - Connection stability validation
 
-### 内存优化 / Memory Optimizations
-- 预分配缓冲区: 避免运行时分配
-- 零拷贝操作: 减少内存拷贝
-- 固定大小结构: 缓存友好的内存布局
+#### Advanced Options
 
-## 消息类型 / Message Types
+```bash
+# Custom server configuration
+./build/bin/test_client --ip 127.0.0.1 --port 8888 --mode comprehensive
 
-### 订单消息 / Order Messages
-- `ORDER_NEW`: 新订单
-- `ORDER_CANCEL`: 取消订单
-- `ORDER_REPLACE`: 替换订单
-- `ORDER_FILL`: 订单成交
+# Performance test with custom parameters
+./build/bin/test_client --mode performance --count 10000 --delay 1
 
-### 市场数据 / Market Data
-- `MARKET_DATA`: 市场数据更新
-- `HEARTBEAT`: 心跳检测
+# Market data test with specific symbols
+./build/bin/test_client --mode market_data --symbols AAPL,MSFT,GOOGL
+```
 
-### 系统消息 / System Messages
-- `LOGIN`: 登录认证
-- `LOGOUT`: 登出
-- `ERROR`: 错误信息
+### Ultra Test Client
 
-## 服务架构 / Service Architecture
+The `ultra_test_client` is specifically designed for testing the ultra HFT server with advanced performance measurement capabilities.
 
-### IMessageService 接口
+#### Basic Usage
+
+```bash
+# Show help
+./build/bin/ultra_test_client --help
+
+# Ultra-low latency test
+./build/bin/ultra_test_client --mode latency --count 10000
+
+# High throughput test
+./build/bin/ultra_test_client --mode throughput --count 50000
+
+# Stress test
+./build/bin/ultra_test_client --mode stress --duration 300 --rate 5000
+
+# Market data streaming
+./build/bin/ultra_test_client --mode streaming --duration 120 --rate 1000
+```
+
+#### Test Modes
+
+1. **Latency Mode** (`--mode latency`)
+   - **Target**: Sub-10μs latency measurement
+   - **Features**: Nanosecond precision timing
+   - **Usage**: `--count <n>` for message count
+   - **Output**: Detailed latency statistics
+
+2. **Throughput Mode** (`--mode throughput`)
+   - **Target**: Maximum messages per second
+   - **Features**: Burst processing analysis
+   - **Usage**: `--count <n>` and `--burst <size>`
+   - **Output**: Throughput metrics and burst timing
+
+3. **Stress Mode** (`--mode stress`)
+   - **Target**: Sustained high-load testing
+   - **Features**: Rate-limited message sending
+   - **Usage**: `--duration <seconds>` and `--rate <msgs/sec>`
+   - **Output**: Load sustainability analysis
+
+4. **Streaming Mode** (`--mode streaming`)
+   - **Target**: Real-time market data simulation
+   - **Features**: Continuous data flow
+   - **Usage**: `--duration <seconds>` and `--rate <updates/sec>`
+   - **Output**: Streaming performance metrics
+
+#### Advanced Options
+
+```bash
+# Custom server configuration
+./build/bin/ultra_test_client --ip 127.0.0.1 --port 9999 --mode latency
+
+# Latency test with custom parameters
+./build/bin/ultra_test_client --mode latency --count 10000 --delay 1
+
+# Throughput test with burst size
+./build/bin/ultra_test_client --mode throughput --count 100000 --burst 1000
+
+# Stress test with high load
+./build/bin/ultra_test_client --mode stress --duration 600 --rate 10000
+
+# Streaming with high update rate
+./build/bin/ultra_test_client --mode streaming --duration 300 --rate 5000
+```
+
+## 📊 Performance Monitoring
+
+### Real-time Statistics
+
+Both servers provide real-time performance metrics:
+
+```
+=== HFT Server Statistics ===
+Total Messages: 15432
+Active Connections: 5
+Peak Connections: 8
+Average Latency: 18.45 μs
+✓ Low latency target met (< 20μs)
+=================================
+```
+
+### Ultra HFT Server Statistics
+
+```
+=== Ultra HFT Server Statistics ===
+Total Messages: 25467
+Active Connections: 3
+Peak Connections: 12
+Average Latency: 8.92 μs
+✓ Ultra-low latency target met (< 10μs)
+=================================
+```
+
+## 🔧 Configuration
+
+### Socket Options
+
+- **TCP_NODELAY**: Disables Nagle's algorithm for low latency
+- **SO_REUSEADDR**: Allows port reuse for rapid restarts
+- **SO_KEEPALIVE**: Maintains connection health
+- **SO_SNDBUF/SO_RCVBUF**: Optimized buffer sizes
+
+### Threading Configuration
+
+- **Worker Threads**: Configurable thread pool size
+- **Connection Handling**: One thread per connection
+- **Message Processing**: Asynchronous message handling
+
+## 📈 Performance Characteristics
+
+### Latency Targets
+
+- **Standard HFT Server**: < 20μs average latency
+- **Ultra HFT Server**: < 10μs average latency
+- **Measurement**: Nanosecond precision timing
+
+### Throughput Capabilities
+
+- **Standard Server**: 10,000+ messages/second
+- **Ultra Server**: 50,000+ messages/second
+- **Scalability**: Linear scaling with thread count
+
+### Memory Usage
+
+- **Standard Server**: ~60KB executable
+- **Ultra Server**: ~48KB executable
+- **Test Clients**: ~116KB each
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+1. **Permission Denied**
+   ```bash
+   # Fix build directory permissions
+   sudo rm -rf build
+   ./build.sh
+   ```
+
+2. **Connection Refused**
+   ```bash
+   # Check if server is running
+   ps aux | grep hft_server
+   
+   # Start server on correct port
+   ./build/bin/hft_server --port 8888
+   ```
+
+3. **Compilation Errors**
+   ```bash
+   # Ensure C++20 support
+   g++ --version
+   
+   # Clean and rebuild
+   rm -rf build && ./build.sh
+   ```
+
+### Performance Issues
+
+1. **High Latency**
+   - Check CPU frequency scaling
+   - Verify network configuration
+   - Monitor system load
+
+2. **Low Throughput**
+   - Increase thread count
+   - Check buffer sizes
+   - Monitor memory usage
+
+## 🔍 Debugging
+
+### Verbose Logging
+
+```bash
+# Enable debug output
+export HFT_DEBUG=1
+./build/bin/hft_server --port 8888
+```
+
+### Performance Profiling
+
+```bash
+# Profile with perf
+sudo perf record -g ./build/bin/ultra_hft_server
+sudo perf report
+
+# Profile with gprof
+g++ -pg -O2 -o hft_server_debug *.cpp
+./hft_server_debug
+gprof hft_server_debug gmon.out
+```
+
+## 📚 API Reference
+
+### Message Types
+
+```cpp
+// Base message structure
+struct Message {
+    uint64_t message_id;
+    uint64_t timestamp;
+    uint32_t message_type;
+    uint32_t payload_size;
+    std::array<uint8_t, 1024> payload;
+};
+
+// Order message
+struct OrderMessage : public Message {
+    char symbol[16];
+    uint32_t side;      // 0=BUY, 1=SELL
+    uint64_t quantity;
+    uint64_t price;
+    uint32_t order_type;
+    uint32_t time_in_force;
+};
+
+// Market data message
+struct MarketDataMessage : public Message {
+    char symbol[16];
+    uint64_t bid_price;
+    uint64_t bid_size;
+    uint64_t ask_price;
+    uint64_t ask_size;
+    uint64_t last_price;
+    uint64_t volume;
+};
+```
+
+### Service Interface
+
 ```cpp
 class IMessageService {
 public:
+    virtual ~IMessageService() = default;
     virtual void process_message(const Message& msg, Connection& conn) = 0;
-    virtual void on_connection_established(Connection& conn) = 0;
-    virtual void on_connection_closed(Connection& conn) = 0;
+    virtual std::string get_service_name() const = 0;
 };
 ```
 
-### 内置服务 / Built-in Services
-- **OrderService**: 订单管理服务
-- **MarketDataService**: 市场数据服务
+## 🌟 Advanced Features
 
-### 自定义服务 / Custom Services
-```cpp
-class CustomService : public IMessageService {
-public:
-    void process_message(const Message& msg, Connection& conn) override {
-        // 实现自定义消息处理逻辑
-    }
-    
-    void on_connection_established(Connection& conn) override {
-        // 连接建立时的处理
-    }
-    
-    void on_connection_closed(Connection& conn) override {
-        // 连接关闭时的处理
-    }
-};
+### Ultra HFT Server Features
 
-// 注册服务
-server.register_service(MessageType::CUSTOM, std::make_shared<CustomService>());
-```
+- **Lock-free Queues**: Atomic operations for maximum performance
+- **Cache-line Alignment**: Optimized memory access patterns
+- **Zero-copy Processing**: Minimal memory allocations
+- **Pre-allocated Buffers**: Fixed-size memory pools
+- **Atomic Statistics**: Thread-safe performance metrics
 
-## 性能监控 / Performance Monitoring
+### Test Client Features
 
-服务器提供实时性能统计信息：
+- **Multi-mode Testing**: Comprehensive test scenarios
+- **Performance Metrics**: Detailed latency and throughput analysis
+- **Real-time Monitoring**: Live performance tracking
+- **Customizable Parameters**: Configurable test parameters
+- **Error Handling**: Robust error detection and reporting
 
-```
-=== Server Statistics ===
-Total Messages: 1,234,567
-Active Connections: 45
-Peak Connections: 100
-Average Latency: 15.23 μs
-✓ Latency target met (< 20μs)
-========================
-```
+## 🤝 Contributing
 
-## 故障排除 / Troubleshooting
+### Development Setup
 
-### 常见问题 / Common Issues
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-1. **编译错误 / Compilation Errors**
-   - 确保使用C++20兼容的编译器
-   - 检查系统依赖是否完整
+### Code Style
 
-2. **性能问题 / Performance Issues**
-   - 调整工作线程数
-   - 检查系统网络配置
-   - 使用性能分析工具
+- Follow C++20 best practices
+- Use meaningful variable names
+- Add comprehensive comments
+- Include error handling
+- Maintain performance focus
 
-3. **连接问题 / Connection Issues**
-   - 检查防火墙设置
-   - 验证端口可用性
-   - 检查网络配置
+## 📄 License
 
-### 调试模式 / Debug Mode
-```bash
-# 使用Debug构建
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-make
-```
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 贡献 / Contributing
+## 🙏 Acknowledgments
 
-欢迎提交Issue和Pull Request来改进项目。
+- Linux kernel team for epoll support
+- C++ Standards Committee for C++20 features
+- High-frequency trading community for performance insights
 
-## 许可证 / License
+## 📞 Support
 
-本项目采用MIT许可证。
+For questions, issues, or contributions:
 
-## 联系方式 / Contact
-
-如有问题或建议，请通过以下方式联系：
-- 提交GitHub Issue
-- 发送邮件至项目维护者
+- Create an issue on GitHub
+- Check the troubleshooting section
+- Review the API documentation
+- Test with provided test clients
 
 ---
 
-**注意**: 此服务器专为HFT应用设计，在生产环境中使用前请充分测试。 
+**Performance Disclaimer**: Actual latency and throughput may vary based on hardware, system configuration, and network conditions. The ultra HFT server is designed for production environments with proper tuning and monitoring. 

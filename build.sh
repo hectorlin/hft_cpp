@@ -151,6 +151,24 @@ build_test_client() {
     fi
 }
 
+# Build ultra_test_client
+build_ultra_test_client() {
+    print_info "Building ultra_test_client (specialized for ultra HFT server)..."
+    
+    g++ $CXXFLAGS $INCLUDES \
+        -o build/bin/ultra_test_client \
+        ultra_test_client.cpp \
+        $LDFLAGS
+    
+    if [ $? -eq 0 ]; then
+        print_success "ultra_test_client built successfully"
+        print_info "Size: $(du -h build/bin/ultra_test_client | cut -f1)"
+    else
+        print_error "Failed to build ultra_test_client"
+        exit 1
+    fi
+}
+
 # Verify build results
 verify_build() {
     print_info "Verifying build results..."
@@ -173,6 +191,13 @@ verify_build() {
         print_success "test_client executable verified"
     else
         print_error "test_client executable not found or not executable"
+        exit 1
+    fi
+    
+    if [ -f "build/bin/ultra_test_client" ] && [ -x "build/bin/ultra_test_client" ]; then
+        print_success "ultra_test_client executable verified"
+    else
+        print_error "ultra_test_client executable not found or not executable"
         exit 1
     fi
 }
@@ -201,6 +226,13 @@ test_executables() {
     else
         print_warning "test_client help command failed"
     fi
+    
+    # Test ultra_test_client help
+    if ./build/bin/ultra_test_client --help >/dev/null 2>&1; then
+        print_success "ultra_test_client help command works"
+    else
+        print_warning "ultra_test_client help command failed"
+    fi
 }
 
 # Show build summary
@@ -213,6 +245,7 @@ show_summary() {
     print_success "✓ hft_server built successfully"
     print_success "✓ ultra_hft_server built successfully"
     print_success "✓ test_client built successfully"
+    print_success "✓ ultra_test_client built successfully"
     print_success "✓ Executables verified"
     print_success "✓ Basic tests passed"
     echo ""
@@ -221,6 +254,7 @@ show_summary() {
     echo "  ./build/bin/hft_server --port 9999 --threads 4"
     echo "  ./build/bin/ultra_hft_server --port 9999 --threads 8"
     echo "  ./build/bin/test_client --mode comprehensive"
+    echo "  ./build/bin/ultra_test_client --mode latency --count 10000"
     echo ""
     print_info "Ultra HFT Server Features:"
     echo "  • Lock-free queues for maximum performance"
@@ -229,6 +263,14 @@ show_summary() {
     echo "  • Sub-10μs latency target"
     echo "  • Pre-allocated buffers"
     echo "  • Atomic operations throughout"
+    echo ""
+    print_info "Ultra Test Client Features:"
+    echo "  • Ultra-low latency testing (< 10μs target)"
+    echo "  • High-throughput performance testing"
+    echo "  • Stress testing with sustained load"
+    echo "  • Real-time market data streaming"
+    echo "  • Nanosecond precision timing"
+    echo "  • Performance metrics and analysis"
     echo ""
     print_info "Build completed without CMake dependency!"
 }
@@ -252,7 +294,7 @@ main() {
     echo "=========================================="
     echo "    HFT Server Build Script for Linux"
     echo "    Direct g++ Compilation (No CMake)"
-    echo "    Including Ultra HFT Server"
+    echo "    Including Ultra HFT Server & Test Client"
     echo "=========================================="
     echo ""
     
@@ -263,6 +305,7 @@ main() {
     build_hft_server
     build_ultra_hft_server
     build_test_client
+    build_ultra_test_client
     verify_build
     test_executables
     show_compiler_info
@@ -272,6 +315,7 @@ main() {
     print_success "Build process completed successfully! 🚀"
     print_info "No CMake required - direct g++ compilation!"
     print_info "Ultra HFT Server with lock-free queues ready!"
+    print_info "Ultra Test Client for performance testing ready!"
 }
 
 # Run main function
