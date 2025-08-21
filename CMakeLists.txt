@@ -33,10 +33,16 @@ endif()
 # Find required packages
 find_package(Threads REQUIRED)
 
-# Source files
-set(SOURCES
+# Source files for standard HFT server
+set(HFT_SERVER_SOURCES
     main.cpp
     hft_server.cpp
+)
+
+# Source files for ultra HFT server
+set(ULTRA_HFT_SOURCES
+    ultra_main.cpp
+    ultra_hft_server.cpp
 )
 
 # Test client source
@@ -48,13 +54,20 @@ set(TEST_CLIENT_SOURCES
 set(HEADERS
     message.h
     hft_server.h
+    ultra_hft_server.h
 )
 
-# Create executable
-add_executable(hft_server ${SOURCES} ${HEADERS})
+# Create standard HFT server executable
+add_executable(hft_server ${HFT_SERVER_SOURCES} ${HEADERS})
 
-# Link libraries
+# Link libraries for standard HFT server
 target_link_libraries(hft_server PRIVATE Threads::Threads)
+
+# Create ultra HFT server executable
+add_executable(ultra_hft_server ${ULTRA_HFT_SOURCES} ${HEADERS})
+
+# Link libraries for ultra HFT server
+target_link_libraries(ultra_hft_server PRIVATE Threads::Threads)
 
 # Create test client executable
 add_executable(test_client ${TEST_CLIENT_SOURCES} ${HEADERS})
@@ -62,26 +75,37 @@ add_executable(test_client ${TEST_CLIENT_SOURCES} ${HEADERS})
 # Link libraries for test client
 target_link_libraries(test_client PRIVATE Threads::Threads)
 
-# Include directories for test client
+# Include directories for all targets
+target_include_directories(hft_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(ultra_hft_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(test_client PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Include directories
-target_include_directories(hft_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-# Compiler definitions
+# Compiler definitions for all targets
 target_compile_definitions(hft_server PRIVATE
     _GNU_SOURCE
     _REENTRANT
     NDEBUG
 )
 
-# Set output directory for both targets
-set_target_properties(hft_server test_client PROPERTIES
+target_compile_definitions(ultra_hft_server PRIVATE
+    _GNU_SOURCE
+    _REENTRANT
+    NDEBUG
+)
+
+target_compile_definitions(test_client PRIVATE
+    _GNU_SOURCE
+    _REENTRANT
+    NDEBUG
+)
+
+# Set output directory for all targets
+set_target_properties(hft_server ultra_hft_server test_client PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
-# Install target
-install(TARGETS hft_server test_client
+# Install targets
+install(TARGETS hft_server ultra_hft_server test_client
     RUNTIME DESTINATION bin
 )
 
@@ -102,8 +126,16 @@ endif()
 # Add custom target for performance testing
 add_custom_target(perf_test
     COMMAND ${CMAKE_BINARY_DIR}/bin/hft_server --help
-    COMMENT "Testing HFT server performance configuration"
-    DEPENDS hft_server
+    COMMAND ${CMAKE_BINARY_DIR}/bin/ultra_hft_server --help
+    COMMENT "Testing HFT servers performance configuration"
+    DEPENDS hft_server ultra_hft_server
+)
+
+# Add custom target for ultra performance testing
+add_custom_target(ultra_perf_test
+    COMMAND ${CMAKE_BINARY_DIR}/bin/ultra_hft_server --help
+    COMMENT "Testing Ultra HFT server lock-free performance configuration"
+    DEPENDS ultra_hft_server
 )
 
 # Add custom target for clean build
@@ -111,4 +143,18 @@ add_custom_target(clean_all
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target clean
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}
     COMMENT "Cleaning all build artifacts"
-) 
+)
+
+# Print build summary
+message(STATUS "Building targets:")
+message(STATUS "  - hft_server: Standard HFT server with service architecture")
+message(STATUS "  - ultra_hft_server: Ultra HFT server with lock-free queues")
+message(STATUS "  - test_client: Comprehensive test client")
+message(STATUS "")
+message(STATUS "Ultra HFT Server Features:")
+message(STATUS "  - Lock-free queues for maximum performance")
+message(STATUS "  - Cache-line aligned data structures")
+message(STATUS "  - Zero-copy message processing")
+message(STATUS "  - Sub-10μs latency target")
+message(STATUS "  - Pre-allocated buffers")
+message(STATUS "  - Atomic operations throughout") 
