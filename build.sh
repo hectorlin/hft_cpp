@@ -115,6 +115,24 @@ build_hft_server() {
     fi
 }
 
+# Build ultra_hft_server
+build_ultra_hft_server() {
+    print_info "Building ultra_hft_server (lock-free optimized)..."
+    
+    g++ $CXXFLAGS $INCLUDES \
+        -o build/bin/ultra_hft_server \
+        ultra_main.cpp ultra_hft_server.cpp \
+        $LDFLAGS
+    
+    if [ $? -eq 0 ]; then
+        print_success "ultra_hft_server built successfully"
+        print_info "Size: $(du -h build/bin/ultra_hft_server | cut -f1)"
+    else
+        print_error "Failed to build ultra_hft_server"
+        exit 1
+    fi
+}
+
 # Build test_client
 build_test_client() {
     print_info "Building test_client..."
@@ -144,6 +162,13 @@ verify_build() {
         exit 1
     fi
     
+    if [ -f "build/bin/ultra_hft_server" ] && [ -x "build/bin/ultra_hft_server" ]; then
+        print_success "ultra_hft_server executable verified"
+    else
+        print_error "ultra_hft_server executable not found or not executable"
+        exit 1
+    fi
+    
     if [ -f "build/bin/test_client" ] && [ -x "build/bin/test_client" ]; then
         print_success "test_client executable verified"
     else
@@ -163,6 +188,13 @@ test_executables() {
         print_warning "hft_server help command failed"
     fi
     
+    # Test ultra_hft_server help
+    if ./build/bin/ultra_hft_server --help >/dev/null 2>&1; then
+        print_success "ultra_hft_server help command works"
+    else
+        print_warning "ultra_hft_server help command failed"
+    fi
+    
     # Test test_client help
     if ./build/bin/test_client --help >/dev/null 2>&1; then
         print_success "test_client help command works"
@@ -179,6 +211,7 @@ show_summary() {
     print_success "✓ Build directory created"
     print_success "✓ Compiler flags configured"
     print_success "✓ hft_server built successfully"
+    print_success "✓ ultra_hft_server built successfully"
     print_success "✓ test_client built successfully"
     print_success "✓ Executables verified"
     print_success "✓ Basic tests passed"
@@ -186,7 +219,16 @@ show_summary() {
     print_info "Executables are located in: build/bin/"
     print_info "You can now run:"
     echo "  ./build/bin/hft_server --port 9999 --threads 4"
+    echo "  ./build/bin/ultra_hft_server --port 9999 --threads 8"
     echo "  ./build/bin/test_client --mode comprehensive"
+    echo ""
+    print_info "Ultra HFT Server Features:"
+    echo "  • Lock-free queues for maximum performance"
+    echo "  • Cache-line aligned data structures"
+    echo "  • Zero-copy message processing"
+    echo "  • Sub-10μs latency target"
+    echo "  • Pre-allocated buffers"
+    echo "  • Atomic operations throughout"
     echo ""
     print_info "Build completed without CMake dependency!"
 }
@@ -210,6 +252,7 @@ main() {
     echo "=========================================="
     echo "    HFT Server Build Script for Linux"
     echo "    Direct g++ Compilation (No CMake)"
+    echo "    Including Ultra HFT Server"
     echo "=========================================="
     echo ""
     
@@ -218,6 +261,7 @@ main() {
     create_build_dir
     set_compiler_flags
     build_hft_server
+    build_ultra_hft_server
     build_test_client
     verify_build
     test_executables
@@ -227,6 +271,7 @@ main() {
     echo ""
     print_success "Build process completed successfully! 🚀"
     print_info "No CMake required - direct g++ compilation!"
+    print_info "Ultra HFT Server with lock-free queues ready!"
 }
 
 # Run main function
