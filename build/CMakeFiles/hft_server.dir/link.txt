@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG -O3 -march=native -mtune=native -ffast-math -funroll-loops -fno-exceptions -fno-rtti -flto -fwhole-program -DNDEBUG -fomit-frame-pointer -DSO_REUSEADDR -DTCP_NODELAY  -flto -Wl,--dependency-file=CMakeFiles/hft_server.dir/link.d CMakeFiles/hft_server.dir/main.cpp.o CMakeFiles/hft_server.dir/hft_server.cpp.o -o bin/hft_server

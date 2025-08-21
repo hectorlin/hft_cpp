@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG -O3 -march=native -mtune=native -ffast-math -funroll-loops -fno-exceptions -fno-rtti -flto -fwhole-program -DNDEBUG -fomit-frame-pointer -DSO_REUSEADDR -DTCP_NODELAY  -flto -Wl,--dependency-file=CMakeFiles/test_client.dir/link.d CMakeFiles/test_client.dir/test_client.cpp.o -o bin/test_client
